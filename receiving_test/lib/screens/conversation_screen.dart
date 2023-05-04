@@ -60,10 +60,14 @@ class _ConversationScreenState extends State<ConversationScreen> {
         } else if (snapshot.hasData) {
           final List<Map<dynamic, dynamic>>? smsList = snapshot.data;
           if (smsList != null && smsList.isNotEmpty) {
+            // Reverse the smsList
+            List<Map<dynamic, dynamic>> reversedSmsList =
+                smsList.reversed.toList();
+
             return ListView.builder(
-              itemCount: smsList.length,
+              itemCount: reversedSmsList.length,
               itemBuilder: (BuildContext context, int index) {
-                final Map<dynamic, dynamic> sms = smsList[index];
+                final Map<dynamic, dynamic> sms = reversedSmsList[index];
 
                 // Convert the timestamp to a DateTime object
                 DateTime timestamp = DateTime.fromMillisecondsSinceEpoch(
