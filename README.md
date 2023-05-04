@@ -67,6 +67,8 @@ Distributed under the GNU General Public License v3.0. See `LICENSE` for more in
 ## Contact
 
 Email - azom.developer@gmail.com
+Discord - azom#6496
+(yes, I know, this is ironic)
 
 Join us in creating a future where communication is more integrated, customizable, and secure. Let's ride the Wave together.
 
