@@ -2,34 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:receiving_test/screens/conversation_screen.dart';
 
+import '../models/conversation_model.dart';
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<int> _conversationIds = [];
+  final List<ConversationModel> _conversations = [];
   final TextEditingController _textEditingController = TextEditingController();
   static const MethodChannel _channel =
       const MethodChannel('com.example.receiving_test');
 
-  Future<void> _fetchConversationIds() async {
+  Future<void> _fetchConversations() async {
     try {
-      final List<dynamic> conversationIdsList =
+      final List<dynamic> conversationsList =
           await _channel.invokeMethod('getAllConversations');
-      final List<int> conversationIds = conversationIdsList.cast<int>();
+      final List<ConversationModel> conversations =
+          conversationsList.map((conversationMap) {
+        return ConversationModel(
+          conversationId: conversationMap['conversationId'],
+          conversationName: conversationMap['conversationName'],
+        );
+      }).toList();
+
       setState(() {
-        _conversationIds.clear();
-        _conversationIds.addAll(conversationIds);
+        _conversations.clear();
+        _conversations.addAll(conversations);
       });
-      for (var id in conversationIdsList) {
-        print("Conversation with id: " + id.toString() + " has been loaded.");
+
+      for (var conversation in conversations) {
+        print(
+            "Conversation with id: ${conversation.conversationId} and name: ${conversation.conversationName} has been loaded.");
       }
-      if (conversationIdsList.isEmpty) {
-        print("No conversations where loaded");
+      if (conversations.isEmpty) {
+        print("No conversations were loaded");
       }
     } on PlatformException catch (e) {
-      print("Failed to fetch conversation IDs: '${e.message}'.");
+      print("Failed to fetch conversations: '${e.message}'.");
     }
   }
 
@@ -42,8 +53,13 @@ class _HomeScreenState extends State<HomeScreen> {
       });
 
       // Create a new conversation and get the conversationId
-      final int conversationId =
-          await _channel.invokeMethod('createNewConversation');
+      final int conversationId = await _channel
+          .invokeMethod('createNewConversation', <String, dynamic>{
+        'conversationName': phoneNumber,
+      });
+      final String conversationName = phoneNumber;
+      final ConversationModel newConversation = ConversationModel(
+          conversationId: conversationId, conversationName: conversationName);
 
       // Create a new participant using the userId and conversationId
       await _channel.invokeMethod('createNewParticipant', <String, dynamic>{
@@ -53,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       // Add the conversationId to the _conversationIds list and trigger a rebuild
       setState(() {
-        _conversationIds.add(conversationId);
+        _conversations.add(newConversation);
       });
     } on PlatformException catch (e) {
       print("Failed to create conversation: '${e.message}'.");
@@ -63,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchConversationIds();
+    _fetchConversations();
   }
 
   @override
@@ -108,11 +124,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Expanded(
               child: ListView.builder(
-                itemCount: _conversationIds.length,
+                itemCount: _conversations.length,
                 itemBuilder: (BuildContext context, int index) {
                   return ListTile(
                     title: Text(
-                      'Conversation ${_conversationIds[index]}',
+                      '${_conversations[index].conversationName}',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w400,
@@ -124,7 +140,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => ConversationScreen(
-                              conversationId: _conversationIds[index]),
+                              conversationId:
+                                  _conversations[index].conversationId),
                         ),
                       );
                     },

@@ -16,6 +16,7 @@ class SmsDatabaseHandler(context: Context) :
 
         private const val TABLE_CONVERSATIONS = "conversations"
         private const val KEY_CONVERSATION_ID = "conversation_id"
+        private const val KEY_CONVERSATION_NAME = "conversation_name"
 
         private const val TABLE_USERS = "users"
         private const val KEY_USER_ID = "user_id"
@@ -32,7 +33,8 @@ class SmsDatabaseHandler(context: Context) :
 
     override fun onCreate(db: SQLiteDatabase?) {
         val createConversationsTable = """CREATE TABLE $TABLE_CONVERSATIONS(
-                $KEY_CONVERSATION_ID INTEGER PRIMARY KEY AUTOINCREMENT
+                $KEY_CONVERSATION_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $KEY_CONVERSATION_NAME TEXT
                 )"""
 
         val createUsersTable = """CREATE TABLE $TABLE_USERS(
@@ -114,8 +116,8 @@ class SmsDatabaseHandler(context: Context) :
         return messageList
     }
 
-    fun getAllConversations(): List<Int> {
-        val conversationList = ArrayList<Int>()
+    fun getAllConversations(): List<ConversationModel> {
+        val conversationList = ArrayList<ConversationModel>()
 
         try {
             val db = this.readableDatabase
@@ -125,7 +127,8 @@ class SmsDatabaseHandler(context: Context) :
 
             while (cursor.moveToNext()) {
                 val id = cursor.getInt(cursor.getColumnIndex(KEY_CONVERSATION_ID))
-                conversationList.add(id)
+                val name = cursor.getString(cursor.getColumnIndex(KEY_CONVERSATION_NAME))
+                conversationList.add(ConversationModel(id, name))
             }
 
             cursor.close()
@@ -195,21 +198,19 @@ class SmsDatabaseHandler(context: Context) :
         return null
     }
 
-    fun createNewConversation(): Int {
+    fun createNewConversation(conversationName: String): Int {
         var conversationId = -1
 
         try {
             val db = this.writableDatabase
 
             // Create a new conversation
-            db.execSQL("INSERT INTO $TABLE_CONVERSATIONS DEFAULT VALUES")
-
-            // Get the ID of the newly inserted conversation
-            val cursor = db.rawQuery("SELECT last_insert_rowid()", null)
-            if (cursor.moveToFirst()) {
-                conversationId = cursor.getInt(0)
+            val conversationValues = ContentValues().apply {
+                put(KEY_CONVERSATION_NAME, conversationName)
             }
-            cursor.close()
+
+            // Insert the new conversation into the table and get its ID
+            conversationId = db.insert(TABLE_CONVERSATIONS, null, conversationValues).toInt()
 
             val userId = createOrReturnUser("me")
             createNewParticipant(userId, conversationId)

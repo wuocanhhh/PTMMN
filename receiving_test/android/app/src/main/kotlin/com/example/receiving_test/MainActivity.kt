@@ -73,11 +73,19 @@ class MainActivity: FlutterActivity() {
                 }
 
                 "getAllConversations" -> {
-                    result.success(smsDatabaseHandler.getAllConversations())
+                    val conversationModels = smsDatabaseHandler.getAllConversations()
+                    val conversationMaps = conversationModels.map {
+                        mapOf(
+                            "conversationId" to it.conversationId,
+                            "conversationName" to it.conversationName
+                        )
+                    }
+                    result.success(conversationMaps)
                 }
 
                 "createNewConversation" -> {
-                    result.success(smsDatabaseHandler.createNewConversation())
+                    val conversationName = call.argument<String>("conversationName")
+                    result.success(smsDatabaseHandler.createNewConversation(conversationName!!))
                 }
 
                 "createNewUser" -> {

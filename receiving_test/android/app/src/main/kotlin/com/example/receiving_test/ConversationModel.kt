@@ -1,5 +1,6 @@
 package com.example.receiving_test
 
 data class ConversationModel(
-    var conversationId: Int = 0
+    var conversationId: Int = 0,
+    var conversationName: String = ""
 )

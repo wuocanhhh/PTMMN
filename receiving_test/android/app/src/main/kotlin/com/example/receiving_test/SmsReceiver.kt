@@ -35,7 +35,7 @@ class SmsReceiver : BroadcastReceiver() {
                 var conversationId = smsDatabaseHandler.getConversationId(senderId)
                 if (conversationId == null) {
                     Log.d("SmsReceiver", "Received a message that is not associated to any conversation. Creating a new one")
-                    conversationId = smsDatabaseHandler.createNewConversation()
+                    conversationId = smsDatabaseHandler.createNewConversation(senderPhoneNumber)
                     smsDatabaseHandler.createNewParticipant(senderId, conversationId)
                 }
 
