@@ -54,20 +54,17 @@ class _ConversationScreenState extends State<ConversationScreen> {
       builder: (BuildContext context,
           AsyncSnapshot<List<Map<dynamic, dynamic>>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else if (snapshot.hasData) {
           final List<Map<dynamic, dynamic>>? smsList = snapshot.data;
           if (smsList != null && smsList.isNotEmpty) {
-            // Reverse the smsList
-            List<Map<dynamic, dynamic>> reversedSmsList =
-                smsList.reversed.toList();
-
             return ListView.builder(
-              itemCount: reversedSmsList.length,
+              reverse: true,
+              itemCount: smsList.length,
               itemBuilder: (BuildContext context, int index) {
-                final Map<dynamic, dynamic> sms = reversedSmsList[index];
+                final Map<dynamic, dynamic> sms = smsList[index];
 
                 // Convert the timestamp to a DateTime object
                 DateTime timestamp = DateTime.fromMillisecondsSinceEpoch(
@@ -78,7 +75,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 return ListTile(
                   title: Text(
                     sms['message'],
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w400,
                       color: Colors.white,
@@ -86,7 +83,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                   ),
                   subtitle: Text(
                     formattedTimestamp,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w300,
                       color: Colors.white70,
@@ -96,10 +93,10 @@ class _ConversationScreenState extends State<ConversationScreen> {
               },
             );
           } else {
-            return Text('No messages');
+            return const Text('No messages');
           }
         } else {
-          return Text('No messages');
+          return const Text('No messages');
         }
       },
     );
@@ -128,35 +125,35 @@ class _ConversationScreenState extends State<ConversationScreen> {
         appBar: AppBar(
           title: Text(
             widget.conversationId.toString(),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w500,
             ),
           ),
         ),
-        backgroundColor: Color(0xFF2C2C2E), // Set the background color
+        backgroundColor: const Color(0xFF2C2C2E), // Set the background color
         body: Column(
           children: <Widget>[
             Expanded(child: _buildMessageList()),
             Padding(
-              padding: EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: <Widget>[
                   Expanded(
                     child: TextField(
                       controller: _messageController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Type a message',
                         hintStyle: TextStyle(color: Colors.white),
                       ),
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                       onTap: () {
                         FocusScope.of(context).requestFocus();
                       },
                     ),
                   ),
                   IconButton(
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.send,
                       color: Colors.blue,
                     ),
