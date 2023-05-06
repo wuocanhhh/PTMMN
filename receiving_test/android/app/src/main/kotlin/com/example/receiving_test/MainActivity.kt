@@ -3,6 +3,7 @@ package com.example.receiving_test
 import android.os.Bundle
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.EventChannel
 import android.telephony.SmsManager
 import android.widget.Toast
 import com.example.receiving_test.SmsDatabaseHandler
@@ -12,7 +13,8 @@ import android.content.Context
 import android.telephony.TelephonyManager
 
 class MainActivity: FlutterActivity() {
-    private val CHANNEL = "com.example.receiving_test"
+    private val METHOD_CHANNEL = "com.example.receiving_test/method"
+    private val EVENT_CHANNEL = "com.example.receiving_test/event"
     private val smsReceiver = SmsReceiver()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,7 +22,7 @@ class MainActivity: FlutterActivity() {
 
         val smsDatabaseHandler = SmsDatabaseHandler(this)
 
-        MethodChannel(flutterEngine!!.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
+        MethodChannel(flutterEngine!!.dartExecutor.binaryMessenger, METHOD_CHANNEL).setMethodCallHandler {
             call, result ->
             when (call.method) {
                 "getConversation" -> {
@@ -102,8 +104,33 @@ class MainActivity: FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+
+        EventChannel(flutterEngine!!.dartExecutor.binaryMessenger, EVENT_CHANNEL).setStreamHandler(
+            object : EventChannel.StreamHandler {
+                override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                    eventSink = events
+                }
+
+                override fun onCancel(arguments: Any?) {
+                    eventSink = null
+                }
+            })
     }
 
+    companion object {
+        private var eventSink: EventChannel.EventSink? = null
+
+        @JvmStatic
+        fun sendConversationToFlutter(conversation: ConversationModel) {
+            Log.d("MyApp", "Conversation was apparently been received by MainActivity")
+            val conversationModel: ConversationModel = conversation
+            val conversationMap = mapOf(
+                "conversationId" to conversationModel.conversationId,
+                "conversationName" to conversationModel.conversationName
+            )
+            eventSink?.success(conversationMap)
+        }
+    }
     private fun sendSms(phoneNumber: String, message: String) {
         try {
             val smsManager = SmsManager.getDefault()

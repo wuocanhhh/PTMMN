@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:receiving_test/screens/conversation_screen.dart';
 
+import '../channels_handler.dart';
 import '../models/conversation_model.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -11,22 +12,25 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final List<ConversationModel> _conversations = [];
+  final ChannelHandler _channelHandler = ChannelHandler();
   final TextEditingController _textEditingController = TextEditingController();
-  static const MethodChannel _channel =
-      const MethodChannel('com.example.receiving_test');
+
+  void _setUpEventListener() {
+    _channelHandler.setUpEventListener(_onEventReceived);
+  }
+
+  void _onEventReceived(ConversationModel conversation) {
+    print("A new conversation was created, is the UI updating?"); //! temporary
+    setState(() {
+      _conversations.add(conversation);
+    });
+  }
 
   Future<void> _fetchConversations() async {
-    try {
-      final List<dynamic> conversationsList =
-          await _channel.invokeMethod('getAllConversations');
-      final List<ConversationModel> conversations =
-          conversationsList.map((conversationMap) {
-        return ConversationModel(
-          conversationId: conversationMap['conversationId'],
-          conversationName: conversationMap['conversationName'],
-        );
-      }).toList();
+    final List<ConversationModel>? conversations =
+        await _channelHandler.fetchConversations();
 
+    if (conversations != null) {
       setState(() {
         _conversations.clear();
         _conversations.addAll(conversations);
@@ -39,38 +43,23 @@ class _HomeScreenState extends State<HomeScreen> {
       if (conversations.isEmpty) {
         print("No conversations were loaded");
       }
-    } on PlatformException catch (e) {
-      print("Failed to fetch conversations: '${e.message}'.");
+    } else {
+      print("Failed to fetch conversations.");
     }
   }
 
   Future<void> _createConversation(String phoneNumber) async {
     try {
-      // Create a new user and get the userId
-      final int userId =
-          await _channel.invokeMethod('createNewUser', <String, dynamic>{
-        'phoneNumber': phoneNumber,
-      });
-
-      // Create a new conversation and get the conversationId
-      final int conversationId = await _channel
-          .invokeMethod('createNewConversation', <String, dynamic>{
-        'conversationName': phoneNumber,
-      });
-      final String conversationName = phoneNumber;
-      final ConversationModel newConversation = ConversationModel(
-          conversationId: conversationId, conversationName: conversationName);
-
-      // Create a new participant using the userId and conversationId
-      await _channel.invokeMethod('createNewParticipant', <String, dynamic>{
-        'userId': userId,
-        'conversationId': conversationId,
-      });
-
-      // Add the conversationId to the _conversationIds list and trigger a rebuild
-      setState(() {
-        _conversations.add(newConversation);
-      });
+      final ConversationModel? newConversation =
+          await _channelHandler.createConversation(phoneNumber);
+      if (newConversation != null) {
+        // Add the conversationId to the _conversationIds list and trigger a rebuild
+        setState(() {
+          _conversations.add(newConversation);
+        });
+      } else {
+        print("Failed to create conversation.");
+      }
     } on PlatformException catch (e) {
       print("Failed to create conversation: '${e.message}'.");
     }
@@ -79,6 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _setUpEventListener();
     _fetchConversations();
   }
 

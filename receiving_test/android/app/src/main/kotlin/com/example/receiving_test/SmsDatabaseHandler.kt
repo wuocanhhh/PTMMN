@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import android.database.Cursor
+import com.example.receiving_test.MainActivity
 
 class SmsDatabaseHandler(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -118,7 +119,6 @@ class SmsDatabaseHandler(context: Context) :
 
     fun getAllConversations(): List<ConversationModel> {
         val conversationList = ArrayList<ConversationModel>()
-
         try {
             val db = this.readableDatabase
             val allConversations = "SELECT * FROM $TABLE_CONVERSATIONS"

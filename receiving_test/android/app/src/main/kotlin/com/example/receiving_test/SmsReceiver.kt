@@ -36,6 +36,12 @@ class SmsReceiver : BroadcastReceiver() {
                 if (conversationId == null) {
                     Log.d("SmsReceiver", "Received a message that is not associated to any conversation. Creating a new one")
                     conversationId = smsDatabaseHandler.createNewConversation(senderPhoneNumber)
+                    val conversation = ConversationModel(
+                        conversationId = conversationId,
+                        conversationName = senderPhoneNumber
+                    )
+                    MainActivity.sendConversationToFlutter(conversation)
+                    Log.d("SmsReceiver", "Conversation was apparently been sent to MainActivity")
                     smsDatabaseHandler.createNewParticipant(senderId, conversationId)
                 }
 

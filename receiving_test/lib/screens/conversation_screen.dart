@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:receiving_test/channels_handler.dart';
 
 class ConversationScreen extends StatefulWidget {
   final int conversationId;
@@ -12,20 +13,13 @@ class ConversationScreen extends StatefulWidget {
 }
 
 class _ConversationScreenState extends State<ConversationScreen> {
-  final MethodChannel _channel =
-      const MethodChannel('com.example.receiving_test');
   final TextEditingController _messageController = TextEditingController();
-  static const MethodChannel platform =
-      const MethodChannel('com.example.receiving_test');
   late int conversationId;
+  final ChannelHandler _channelHandler = ChannelHandler();
 
   Future<void> _sendMessage(String message) async {
     try {
-      final Map<String, dynamic> sms = {
-        'message': message,
-        'conversationId': conversationId,
-      };
-      await _channel.invokeMethod('sendSms', sms);
+      await _channelHandler.sendMessage(message, conversationId);
       setState(() {}); // Add this line to trigger a rebuild
     } on PlatformException catch (e) {
       print("Failed to add message: '${e.message}'.");
@@ -35,9 +29,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   Future<List<Map>> _getConversation(int conversationId) async {
     try {
       final List conversation =
-          await platform.invokeMethod('getConversation', <String, dynamic>{
-        'conversationId': conversationId,
-      });
+          await _channelHandler.getConversation(conversationId);
       if (conversation.isEmpty) {
         print("There was no message loaded");
       }
