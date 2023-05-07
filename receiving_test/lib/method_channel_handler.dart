@@ -31,16 +31,25 @@ class MethodChannelHandler {
     }
   }
 
-  Future<List<Map>> getConversation(int conversationId) async {
+  Future<List<MessageModel>> getConversation(int conversationId) async {
     try {
-      final List conversation = await _methodChannel
+      final List conversationMap = await _methodChannel
           .invokeMethod('getConversation', <String, dynamic>{
         'conversationId': conversationId,
       });
+      var conversation = conversationMap
+          .map((messageMap) => MessageModel(
+                messageId: messageMap['messageId'],
+                conversationId: messageMap['conversationId'],
+                senderId: messageMap['senderId'],
+                message: messageMap['message'],
+                timestamp: messageMap['timestamp'],
+              ))
+          .toList();
       if (conversation.isEmpty) {
         print("There was no message loaded");
       }
-      return List<Map>.from(conversation);
+      return conversation;
     } on PlatformException catch (e) {
       print("Failed to get conversation: '${e.message}'.");
       return [];

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:receiving_test/method_channel_handler.dart';
+import 'package:receiving_test/models/message_model.dart';
 import 'package:receiving_test/screens/conversation_screen.dart';
 
 import '../event_channel_handler.dart';
@@ -17,36 +18,11 @@ class _HomeScreenState extends State<HomeScreen> {
   final MethodChannelHandler _methodChannelHandler = MethodChannelHandler();
   final TextEditingController _textEditingController = TextEditingController();
 
-  void _setUpEventListener() {
-    _eventChannelHandler.setUpConversationEventListener(
-      onConversationReceived: _onConversationReceived,
-    );
-  }
-
   void _onConversationReceived(ConversationModel conversation) {
     print("A new conversation was created, is the UI updating?");
     setState(() {
       _conversations.add(conversation);
     });
-  }
-
-  Future<void> _fetchConversations() async {
-    final List<ConversationModel>? conversations =
-        await _methodChannelHandler.fetchConversations();
-
-    if (conversations != null) {
-      setState(() {
-        _conversations.clear();
-        _conversations.addAll(conversations);
-      });
-
-      for (var conversation in conversations) {
-        print(
-            "Conversation with id: ${conversation.conversationId} and name: ${conversation.conversationName} has been loaded.");
-      }
-    } else {
-      print("Failed to fetch conversations.");
-    }
   }
 
   Future<void> _createConversation(String phoneNumber) async {
@@ -69,8 +45,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _setUpEventListener();
-    _fetchConversations();
+
+    _eventChannelHandler.setUpConversationEventListener(
+      onConversationReceived: _onConversationReceived,
+    );
+
+    () async {
+      final List<ConversationModel>? conversationList =
+          await _methodChannelHandler.fetchConversations();
+      setState(() {
+        _conversations.addAll(conversationList ?? []);
+      });
+    }();
   }
 
   @override

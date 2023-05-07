@@ -19,15 +19,9 @@ class _ConversationScreenState extends State<ConversationScreen> {
   final List<MessageModel> _messages = [];
   final TextEditingController _messageController = TextEditingController();
   late ConversationModel conversation;
-  final MethodChannelHandler _channelHandler = MethodChannelHandler();
+  final MethodChannelHandler _methodChannelHandler = MethodChannelHandler();
   final EventChannelHandler _eventChannelHandler = EventChannelHandler();
   final ScrollController _scrollController = ScrollController();
-
-  void _setUpEventListener() {
-    _eventChannelHandler.setUpMessageEventListener(
-      onMessageReceived: _onMessageReceived,
-    );
-  }
 
   void _onMessageReceived(MessageModel message) {
     setState(() {
@@ -42,7 +36,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   Future<void> _sendMessage(String message) async {
     try {
-      final MessageModel sentMessage = await _channelHandler.sendMessage(
+      final MessageModel sentMessage = await _methodChannelHandler.sendMessage(
           message, conversation.conversationId);
 
       // Update the _conversations list with the sent message
@@ -56,20 +50,6 @@ class _ConversationScreenState extends State<ConversationScreen> {
       );
     } on PlatformException catch (e) {
       print("Failed to add message: '${e.message}'.");
-    }
-  }
-
-  Future<List<Map>> _getConversation(int conversationId) async {
-    try {
-      final List conversation =
-          await _channelHandler.getConversation(conversationId);
-      if (conversation.isEmpty) {
-        print("There was no message loaded");
-      }
-      return List<Map>.from(conversation);
-    } on PlatformException catch (e) {
-      print("Failed to get conversation: '${e.message}'.");
-      return [];
     }
   }
 
@@ -112,22 +92,18 @@ class _ConversationScreenState extends State<ConversationScreen> {
   @override
   void initState() {
     super.initState();
-    conversation = widget.conversation;
-    _getConversation(widget.conversation.conversationId).then((conversation) {
-      if (conversation.isNotEmpty) {
-        setState(() {
-          // Map the fetched messages to the MessageModel and add them to the _messages list
-          _messages.addAll(conversation.map((messageMap) => MessageModel(
-                messageId: messageMap['messageId'],
-                conversationId: messageMap['conversationId'],
-                senderId: messageMap['senderId'],
-                message: messageMap['message'],
-                timestamp: messageMap['timestamp'],
-              )));
-        });
-      }
-    });
-    _setUpEventListener();
+
+    _eventChannelHandler.setUpMessageEventListener(
+      onMessageReceived: _onMessageReceived,
+    );
+
+    () async {
+      final List<MessageModel> messageList = await _methodChannelHandler
+          .getConversation(widget.conversation.conversationId);
+      setState(() {
+        _messages.addAll(messageList);
+      });
+    }();
   }
 
   @override
