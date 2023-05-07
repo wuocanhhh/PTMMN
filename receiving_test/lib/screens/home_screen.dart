@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:receiving_test/method_channel_handler.dart';
 import 'package:receiving_test/screens/conversation_screen.dart';
 
-import '../channels_handler.dart';
+import '../event_channel_handler.dart';
 import '../models/conversation_model.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -12,15 +13,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final List<ConversationModel> _conversations = [];
-  final ChannelHandler _channelHandler = ChannelHandler();
+  final EventChannelHandler _eventChannelHandler = EventChannelHandler();
+  final MethodChannelHandler _methodChannelHandler = MethodChannelHandler();
   final TextEditingController _textEditingController = TextEditingController();
 
   void _setUpEventListener() {
-    _channelHandler.setUpEventListener(_onEventReceived);
+    _eventChannelHandler.setUpConversationEventListener(
+      onConversationReceived: _onConversationReceived,
+    );
   }
 
-  void _onEventReceived(ConversationModel conversation) {
-    print("A new conversation was created, is the UI updating?"); //! temporary
+  void _onConversationReceived(ConversationModel conversation) {
+    print("A new conversation was created, is the UI updating?");
     setState(() {
       _conversations.add(conversation);
     });
@@ -28,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _fetchConversations() async {
     final List<ConversationModel>? conversations =
-        await _channelHandler.fetchConversations();
+        await _methodChannelHandler.fetchConversations();
 
     if (conversations != null) {
       setState(() {
@@ -40,9 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
         print(
             "Conversation with id: ${conversation.conversationId} and name: ${conversation.conversationName} has been loaded.");
       }
-      if (conversations.isEmpty) {
-        print("No conversations were loaded");
-      }
     } else {
       print("Failed to fetch conversations.");
     }
@@ -51,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _createConversation(String phoneNumber) async {
     try {
       final ConversationModel? newConversation =
-          await _channelHandler.createConversation(phoneNumber);
+          await _methodChannelHandler.createConversation(phoneNumber);
       if (newConversation != null) {
         // Add the conversationId to the _conversationIds list and trigger a rebuild
         setState(() {
@@ -130,8 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => ConversationScreen(
-                              conversationId:
-                                  _conversations[index].conversationId),
+                              conversation: _conversations[index]),
                         ),
                       );
                     },

@@ -67,7 +67,14 @@ class MainActivity: FlutterActivity() {
                             timestamp = System.currentTimeMillis().toString()
                         )
                         smsDatabaseHandler.addMessage(sms)
-                        result.success(message)
+                        
+                        // Return a map containing messageId, senderId, and timestamp
+                        val resultMap = mapOf<String, Any>(
+                            "messageId" to sms.messageId,
+                            "senderId" to sms.senderId,
+                            "timestamp" to sms.timestamp
+                        )
+                        result.success(resultMap)
                     } else {
                         Log.d("MyApp", "Could not send SMS, messages or participants is empty")
                         result.error("UNAVAILABLE", "Could not send SMS", null)
@@ -129,6 +136,18 @@ class MainActivity: FlutterActivity() {
                 "conversationName" to conversationModel.conversationName
             )
             eventSink?.success(conversationMap)
+        }
+
+        @JvmStatic
+        fun sendMessageToFlutter(message: MessageModel) {
+            val messageMap = mapOf(
+                "messageId" to message.messageId,
+                "conversationId" to message.conversationId,
+                "senderId" to message.senderId,
+                "message" to message.message,
+                "timestamp" to message.timestamp
+            )
+            eventSink?.success(messageMap)
         }
     }
     private fun sendSms(phoneNumber: String, message: String) {

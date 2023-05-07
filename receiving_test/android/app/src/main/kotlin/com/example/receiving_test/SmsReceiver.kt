@@ -55,6 +55,7 @@ class SmsReceiver : BroadcastReceiver() {
                     timestamp = System.currentTimeMillis().toString()
                 )
                 smsDatabaseHandler.addMessage(newMessage)
+                MainActivity.sendMessageToFlutter(newMessage)
 
                 showNotification(context, message)
             }

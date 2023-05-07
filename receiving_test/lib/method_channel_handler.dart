@@ -1,43 +1,33 @@
 import 'package:flutter/services.dart';
-
+import 'package:receiving_test/models/message_model.dart';
 import 'models/conversation_model.dart';
 
-class ChannelHandler {
+class MethodChannelHandler {
   static const MethodChannel _methodChannel =
       const MethodChannel('com.example.receiving_test/method');
 
-  static const EventChannel _eventChannel =
-      const EventChannel('com.example.receiving_test/event');
-
-  void setUpEventListener(Function(ConversationModel) onEventReceived) {
-    _eventChannel.receiveBroadcastStream().listen((dynamic event) {
-      if (event is Map) {
-        final Map<String, dynamic> conversationMap =
-            event.cast<String, dynamic>();
-        final ConversationModel conversation = ConversationModel(
-          conversationId: conversationMap['conversationId'],
-          conversationName: conversationMap['conversationName'],
-        );
-        print('Received conversation from Kotlin: $conversation');
-        onEventReceived(
-            conversation); // Invoke the callback with the ConversationModel
-      } else {
-        print('Error: received event is not a Map');
-      }
-    }, onError: (dynamic error) {
-      print('Error receiving conversation from Kotlin: ${error.message}');
-    });
-  }
-
-  Future<void> sendMessage(String message, int conversationId) async {
+  // Inside MethodChannelHandler class
+  Future<MessageModel> sendMessage(String message, int conversationId) async {
     try {
       final Map<String, dynamic> sms = {
         'message': message,
         'conversationId': conversationId,
       };
-      await _methodChannel.invokeMethod('sendSms', sms);
+      final Map<String, dynamic> result = (await _methodChannel
+              .invokeMethod<Map<dynamic, dynamic>>('sendSms', sms))!
+          .cast<String,
+              dynamic>(); // Add this line to cast the result to the correct type
+
+      // Assuming the result map contains messageId, senderId, and timestamp
+      return MessageModel(
+          messageId: result['messageId'],
+          conversationId: conversationId,
+          senderId: result['senderId'],
+          message: message,
+          timestamp: result['timestamp']);
     } on PlatformException catch (e) {
       print("Failed to add message: '${e.message}'.");
+      throw e;
     }
   }
 

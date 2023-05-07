@@ -1,26 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:receiving_test/channels_handler.dart';
+import 'package:receiving_test/event_channel_handler.dart';
+import 'package:receiving_test/method_channel_handler.dart';
+import 'package:receiving_test/models/conversation_model.dart';
+import 'package:receiving_test/models/message_model.dart';
 
 class ConversationScreen extends StatefulWidget {
-  final int conversationId;
+  final ConversationModel conversation;
 
-  ConversationScreen({required this.conversationId});
+  ConversationScreen({required this.conversation});
 
   @override
   _ConversationScreenState createState() => _ConversationScreenState();
 }
 
 class _ConversationScreenState extends State<ConversationScreen> {
+  final List<MessageModel> _messages = [];
   final TextEditingController _messageController = TextEditingController();
-  late int conversationId;
-  final ChannelHandler _channelHandler = ChannelHandler();
+  late ConversationModel conversation;
+  final MethodChannelHandler _channelHandler = MethodChannelHandler();
+  final EventChannelHandler _eventChannelHandler = EventChannelHandler();
+  final ScrollController _scrollController = ScrollController();
+
+  void _setUpEventListener() {
+    _eventChannelHandler.setUpMessageEventListener(
+      onMessageReceived: _onMessageReceived,
+    );
+  }
+
+  void _onMessageReceived(MessageModel message) {
+    setState(() {
+      _messages.insert(0, message);
+    });
+    _scrollController.animateTo(
+      0.0,
+      curve: Curves.easeOut,
+      duration: const Duration(milliseconds: 300),
+    );
+  }
 
   Future<void> _sendMessage(String message) async {
     try {
-      await _channelHandler.sendMessage(message, conversationId);
-      setState(() {}); // Add this line to trigger a rebuild
+      final MessageModel sentMessage = await _channelHandler.sendMessage(
+          message, conversation.conversationId);
+
+      // Update the _conversations list with the sent message
+      setState(() {
+        _messages.insert(0, sentMessage);
+      });
+      _scrollController.animateTo(
+        0.0,
+        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 300),
+      );
     } on PlatformException catch (e) {
       print("Failed to add message: '${e.message}'.");
     }
@@ -41,55 +74,37 @@ class _ConversationScreenState extends State<ConversationScreen> {
   }
 
   Widget _buildMessageList() {
-    return FutureBuilder<List<Map<dynamic, dynamic>>>(
-      future: _getConversation(widget.conversationId),
-      builder: (BuildContext context,
-          AsyncSnapshot<List<Map<dynamic, dynamic>>> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        } else if (snapshot.hasData) {
-          final List<Map<dynamic, dynamic>>? smsList = snapshot.data;
-          if (smsList != null && smsList.isNotEmpty) {
-            return ListView.builder(
-              reverse: true,
-              itemCount: smsList.length,
-              itemBuilder: (BuildContext context, int index) {
-                final Map<dynamic, dynamic> sms = smsList[index];
+    return ListView.builder(
+      reverse: true,
+      controller: _scrollController,
+      itemCount: _messages.length,
+      itemBuilder: (BuildContext context, int index) {
+        final MessageModel message = _messages[index];
 
-                // Convert the timestamp to a DateTime object
-                DateTime timestamp = DateTime.fromMillisecondsSinceEpoch(
-                    int.parse(sms['timestamp']));
-                String formattedTimestamp =
-                    DateFormat('MMM d, y h:mm a').format(timestamp);
+        // Convert the timestamp to a DateTime object
+        DateTime timestamp =
+            DateTime.fromMillisecondsSinceEpoch(int.parse(message.timestamp));
+        String formattedTimestamp =
+            DateFormat('MMM d, y h:mm a').format(timestamp);
 
-                return ListTile(
-                  title: Text(
-                    sms['message'],
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white,
-                    ),
-                  ),
-                  subtitle: Text(
-                    formattedTimestamp,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w300,
-                      color: Colors.white70,
-                    ),
-                  ),
-                );
-              },
-            );
-          } else {
-            return const Text('No messages');
-          }
-        } else {
-          return const Text('No messages');
-        }
+        return ListTile(
+          title: Text(
+            message.message,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w400,
+              color: Colors.white,
+            ),
+          ),
+          subtitle: Text(
+            formattedTimestamp,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w300,
+              color: Colors.white70,
+            ),
+          ),
+        );
       },
     );
   }
@@ -97,14 +112,22 @@ class _ConversationScreenState extends State<ConversationScreen> {
   @override
   void initState() {
     super.initState();
-    conversationId = widget.conversationId; // Add this line
-    _getConversation(widget.conversationId).then((conversation) {
+    conversation = widget.conversation;
+    _getConversation(widget.conversation.conversationId).then((conversation) {
       if (conversation.isNotEmpty) {
         setState(() {
-          conversationId = conversation[0]['conversationId'];
+          // Map the fetched messages to the MessageModel and add them to the _messages list
+          _messages.addAll(conversation.map((messageMap) => MessageModel(
+                messageId: messageMap['messageId'],
+                conversationId: messageMap['conversationId'],
+                senderId: messageMap['senderId'],
+                message: messageMap['message'],
+                timestamp: messageMap['timestamp'],
+              )));
         });
       }
     });
+    _setUpEventListener();
   }
 
   @override
@@ -116,7 +139,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            widget.conversationId.toString(),
+            widget.conversation.conversationName.toString(),
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w500,
