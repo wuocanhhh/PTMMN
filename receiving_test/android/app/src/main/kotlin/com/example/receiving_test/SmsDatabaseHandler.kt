@@ -7,6 +7,10 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import android.database.Cursor
 import com.example.receiving_test.MainActivity
+import com.example.receiving_test.models.ConversationModel
+import com.example.receiving_test.models.MessageModel
+import com.example.receiving_test.models.ParticipantModel
+import com.example.receiving_test.models.UserModel
 
 class SmsDatabaseHandler(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {

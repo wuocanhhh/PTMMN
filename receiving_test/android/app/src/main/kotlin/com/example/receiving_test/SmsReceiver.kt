@@ -13,6 +13,10 @@ import android.telephony.SmsMessage
 import android.util.Log
 import io.flutter.plugin.common.MethodChannel
 import android.telephony.TelephonyManager
+import com.example.receiving_test.models.ConversationModel
+import com.example.receiving_test.models.MessageModel
+import com.example.receiving_test.models.ParticipantModel
+import com.example.receiving_test.models.UserModel
 
 class SmsReceiver : BroadcastReceiver() {
 

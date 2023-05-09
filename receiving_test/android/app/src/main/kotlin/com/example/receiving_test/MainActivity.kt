@@ -7,10 +7,14 @@ import io.flutter.plugin.common.EventChannel
 import android.telephony.SmsManager
 import android.widget.Toast
 import com.example.receiving_test.SmsDatabaseHandler
-import com.example.receiving_test.MessageModel
 import android.util.Log
 import android.content.Context
 import android.telephony.TelephonyManager
+import com.example.receiving_test.models.ConversationModel
+import com.example.receiving_test.models.MessageModel
+import com.example.receiving_test.models.ParticipantModel
+import com.example.receiving_test.models.UserModel
+
 
 class MainActivity: FlutterActivity() {
     private val METHOD_CHANNEL = "com.example.receiving_test/method"
