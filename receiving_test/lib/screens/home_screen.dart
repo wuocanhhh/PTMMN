@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:receiving_test/method_channel_handler.dart';
-import 'package:receiving_test/models/message_model.dart';
 import 'package:receiving_test/screens/conversation_screen.dart';
 
 import '../event_channel_handler.dart';
