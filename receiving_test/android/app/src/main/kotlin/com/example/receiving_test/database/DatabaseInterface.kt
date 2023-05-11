@@ -4,46 +4,44 @@ import com.example.receiving_test.models.ConversationModel
 import com.example.receiving_test.models.MessageModel
 import com.example.receiving_test.models.ParticipantModel
 import com.example.receiving_test.models.UserModel
-import android.util.Log
 import android.content.Context
 
-class DatabaseProcessor(context: Context) {
-    val messageDatabaseHandler = MessageDatabaseHandler(context)
+class DatabaseInterface(context: Context) {
+    private val databaseProcessor = DatabaseProcessor(context)
 
     fun addMessage(message: MessageModel) {
-        messageDatabaseHandler.addMessage(message)
+        databaseProcessor.addMessage(message)
     }
 
     fun getMessagesFromConversation(conversationId: Int): List<MessageModel> {
-        return messageDatabaseHandler.getMessagesFromConversation(conversationId)
+        return databaseProcessor.getMessagesFromConversation(conversationId)
     }
 
     fun getAllConversations(): List<ConversationModel> {
-        return messageDatabaseHandler.getAllConversations()
+        return databaseProcessor.getAllConversations()
     }
 
     fun getAllUsersInConversation(conversationId: Int) : List<UserModel> {
-        return messageDatabaseHandler.getAllUsersInConversation(conversationId)
+        return databaseProcessor.getAllUsersInConversation(conversationId)
     }
 
     fun getConversationId(senderId: Int): Int? {
-        return messageDatabaseHandler.getConversationId(senderId)
+        return databaseProcessor.getConversationId(senderId)
     }
 
     fun createNewConversation(conversationName: String): Int {
-        return messageDatabaseHandler.createNewConversation(conversationName)
+        return databaseProcessor.createNewConversation(conversationName)
     }
 
     fun createOrReturnUser(phoneNumber: String): Int {
-        return messageDatabaseHandler.createOrReturnUser(phoneNumber)
+        return databaseProcessor.createOrReturnUser(phoneNumber)
     }
 
     fun createNewParticipant(userId: Int, conversationId: Int): Boolean {
-        return messageDatabaseHandler.createNewParticipant(userId, conversationId)
+        return databaseProcessor.createNewParticipant(userId, conversationId)
     }
 
     fun getUser(userId: Int): UserModel? {
-        return messageDatabaseHandler.getUser(userId)
+        return databaseProcessor.getUser(userId)
     }
-
 }

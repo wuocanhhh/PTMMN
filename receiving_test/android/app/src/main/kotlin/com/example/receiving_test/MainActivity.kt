@@ -6,7 +6,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.EventChannel
 import android.telephony.SmsManager
 import android.widget.Toast
-import com.example.receiving_test.SmsDatabaseHandler
+import com.example.receiving_test.database.DatabaseInterface
 import android.util.Log
 import android.content.Context
 import android.telephony.TelephonyManager
@@ -24,7 +24,7 @@ class MainActivity: FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val smsDatabaseHandler = SmsDatabaseHandler(this)
+        val databaseInterface = DatabaseInterface(this)
 
         MethodChannel(flutterEngine!!.dartExecutor.binaryMessenger, METHOD_CHANNEL).setMethodCallHandler {
             call, result ->
@@ -32,7 +32,7 @@ class MainActivity: FlutterActivity() {
                 "getConversation" -> {
                     val conversationId = call.argument<Int>("conversationId")
                     if (conversationId != null) {
-                        val messageModels = smsDatabaseHandler.getMessagesFromConversation(conversationId)
+                        val messageModels = databaseInterface.getMessagesFromConversation(conversationId)
                         val messageMaps = messageModels.map {
                             mapOf(
                                 "messageId" to it.messageId,
@@ -52,7 +52,7 @@ class MainActivity: FlutterActivity() {
                 "sendSms" -> {
                     val message = call.argument<String>("message")
                     val conversationId = call.argument<Int>("conversationId")
-                    val users = smsDatabaseHandler.getAllUsersInConversation(conversationId!!)
+                    val users = databaseInterface.getAllUsersInConversation(conversationId!!)
 
                     if (users.isNotEmpty() && message != null) {
                         for (user in users) {
@@ -66,11 +66,11 @@ class MainActivity: FlutterActivity() {
                         val sms = MessageModel(
                             messageId = 0, // Replace this with proper ID generation logic
                             conversationId = conversationId!!,
-                            senderId = smsDatabaseHandler.createOrReturnUser("me"),
+                            senderId = databaseInterface.createOrReturnUser("me"),
                             message = message,
                             timestamp = System.currentTimeMillis().toString()
                         )
-                        smsDatabaseHandler.addMessage(sms)
+                        databaseInterface.addMessage(sms)
                         
                         // Return a map containing messageId, senderId, and timestamp
                         val resultMap = mapOf<String, Any>(
@@ -86,7 +86,7 @@ class MainActivity: FlutterActivity() {
                 }
 
                 "getAllConversations" -> {
-                    val conversationModels = smsDatabaseHandler.getAllConversations()
+                    val conversationModels = databaseInterface.getAllConversations()
                     val conversationMaps = conversationModels.map {
                         mapOf(
                             "conversationId" to it.conversationId,
@@ -98,18 +98,18 @@ class MainActivity: FlutterActivity() {
 
                 "createNewConversation" -> {
                     val conversationName = call.argument<String>("conversationName")
-                    result.success(smsDatabaseHandler.createNewConversation(conversationName!!))
+                    result.success(databaseInterface.createNewConversation(conversationName!!))
                 }
 
                 "createNewUser" -> {
                     val phoneNumber = call.argument<String>("phoneNumber")
-                    result.success(smsDatabaseHandler.createOrReturnUser(phoneNumber!!))
+                    result.success(databaseInterface.createOrReturnUser(phoneNumber!!))
                 }
 
                 "createNewParticipant" -> {
                     val userId = call.argument<Int>("userId")
                     val conversationId = call.argument<Int>("conversationId")
-                    result.success(smsDatabaseHandler.createNewParticipant(userId!!, conversationId!!))
+                    result.success(databaseInterface.createNewParticipant(userId!!, conversationId!!))
                 }
 
                 else -> result.notImplemented()

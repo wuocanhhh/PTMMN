@@ -17,6 +17,7 @@ import com.example.receiving_test.models.ConversationModel
 import com.example.receiving_test.models.MessageModel
 import com.example.receiving_test.models.ParticipantModel
 import com.example.receiving_test.models.UserModel
+import com.example.receiving_test.database.DatabaseInterface
 
 class SmsReceiver : BroadcastReceiver() {
 
@@ -29,24 +30,24 @@ class SmsReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Telephony.Sms.Intents.SMS_DELIVER_ACTION) {
             val smsMessages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
-            val smsDatabaseHandler = SmsDatabaseHandler(context)
+            val databaseInterface = DatabaseInterface(context)
             for (message in smsMessages) {
                 // Determine conversation ID based on the sender's phone number
                 var senderPhoneNumber = message.originatingAddress?.replace(Regex("[^0-9]"), "")
                 senderPhoneNumber = senderPhoneNumber!!.drop(1) //! Temporary
                 Log.d("SmsReceiver", "Message received from $senderPhoneNumber containing: ${message.messageBody}")
-                val senderId = smsDatabaseHandler.createOrReturnUser(senderPhoneNumber!!)
-                var conversationId = smsDatabaseHandler.getConversationId(senderId)
+                val senderId = databaseInterface.createOrReturnUser(senderPhoneNumber!!)
+                var conversationId = databaseInterface.getConversationId(senderId)
                 if (conversationId == null) {
                     Log.d("SmsReceiver", "Received a message that is not associated to any conversation. Creating a new one")
-                    conversationId = smsDatabaseHandler.createNewConversation(senderPhoneNumber)
+                    conversationId = databaseInterface.createNewConversation(senderPhoneNumber)
                     val conversation = ConversationModel(
                         conversationId = conversationId,
                         conversationName = senderPhoneNumber
                     )
                     MainActivity.sendConversationToFlutter(conversation)
                     Log.d("SmsReceiver", "Conversation was apparently been sent to MainActivity")
-                    smsDatabaseHandler.createNewParticipant(senderId, conversationId)
+                    databaseInterface.createNewParticipant(senderId, conversationId)
                 }
 
                 // If conversationId is null, this is a new conversation
@@ -58,7 +59,7 @@ class SmsReceiver : BroadcastReceiver() {
                     message = message.messageBody,
                     timestamp = System.currentTimeMillis().toString()
                 )
-                smsDatabaseHandler.addMessage(newMessage)
+                databaseInterface.addMessage(newMessage)
                 MainActivity.sendMessageToFlutter(newMessage)
 
                 showNotification(context, message)

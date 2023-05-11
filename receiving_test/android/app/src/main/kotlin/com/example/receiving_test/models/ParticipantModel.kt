@@ -1,4 +1,4 @@
-package com.example.models.receiving_test
+package com.example.receiving_test.models
 
 data class ParticipantModel(
     var conversationId: Int = 0,
