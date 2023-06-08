@@ -33,25 +33,20 @@ class MessageDatabaseHandler(context: Context) :
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {Log.d("MessageDatabaseHandler", "Database upgrade attempt detected, but no upgrade required.")}
 
     // This function is used to add a message to the database
-    fun addMessage(message: MessageModel): Boolean {
-
-        this.writableDatabase.use { db ->
-            val contentValues = ContentValues().apply {
-                put(KEY_SENDER, message.sender)
-                put(KEY_CONTENT, message.content)
-                put(KEY_TIMESTAMP, message.timestamp)
-            }
-            return try {
-                // Insert the message into the database
-                val insertSuccess = db.insert(TABLE_MESSAGES, null, contentValues) != -1L
-                Log.d("MessageDatabaseHandler", "Insert operation success: $insertSuccess")
-                return insertSuccess
-            } catch (e: Exception) {
-                Log.e("MessageDatabaseHandler", "Error inserting message", e)
-                return false
-            }
+    fun addMessage(messageValues: ContentValues): Boolean {
+    this.writableDatabase.use { db ->
+        return try {
+            // Insert the message into the database
+            val insertSuccess = db.insert(TABLE_MESSAGES, null, messageValues) != -1L
+            Log.d("MessageDatabaseHandler", "Insert operation success: $insertSuccess")
+            return insertSuccess
+        } catch (e: Exception) {
+            Log.e("MessageDatabaseHandler", "Error inserting message", e)
+            return false
         }
     }
+}
+
 
     // This function is used to fetch all messages from the database
     fun getAllMessages(): List<MessageModel> {
@@ -60,22 +55,23 @@ class MessageDatabaseHandler(context: Context) :
         this.readableDatabase.use { db ->
             val selectQuery = "SELECT * FROM $TABLE_MESSAGES"
             try {
-                // Perform a raw SQL query to fetch all messages
-                db.rawQuery(selectQuery, null).use { cursor ->
+                // Perform a raw SQL query to fetch all messages>
+                db.rawQuery(selectQuery, null).use {
                     // Iterate over the result set
-                    if (cursor.moveToFirst()) {
+                    if (it.moveToFirst()) {
                         do {
                             // Build the message model object for each row in the result set
                             val message = MessageModel().apply {    
-                                id = cursor.getInt(cursor.getColumnIndex(KEY_MESSAGE_ID))
-                                sender = cursor.getString(cursor.getColumnIndex(KEY_SENDER))
-                                content = cursor.getString(cursor.getColumnIndex(KEY_CONTENT))
-                                timestamp = cursor.getString(cursor.getColumnIndex(KEY_TIMESTAMP))
+                                id = it.getInt(it.getColumnIndex(KEY_MESSAGE_ID))
+                                sender = it.getString(it.getColumnIndex(KEY_SENDER))
+                                content = it.getString(it.getColumnIndex(KEY_CONTENT))
+                                timestamp = it.getString(it.getColumnIndex(KEY_TIMESTAMP))
                             }
                             messages.add(message)
-                        } while (cursor.moveToNext())
+                        } while (it.moveToNext())
                     }
                 }
+
                 Log.d("MessageDatabaseHandler", "Number of messages fetched: ${messages.size}")
             } catch (e: Exception) {
                 Log.e("MessageDatabaseHandler", "Error reading all messages", e)
@@ -88,14 +84,13 @@ class MessageDatabaseHandler(context: Context) :
     fun deleteAllMessages(): Boolean {
         this.writableDatabase.use { db ->
             return try {
-                // Delete all messages from the 
+                // Delete all messages from the database
                 val numRowsDeleted = db.delete(TABLE_MESSAGES, null, null)
-                //! TODO Is it possible to merge the line above and below this one?
                 Log.d("MessageDatabaseHandler", "Number of rows deleted: $numRowsDeleted")
-                return true
+                true
             } catch (e: Exception) {
                 Log.e("MessageDatabaseHandler", "Error deleting all messages", e)
-                return false
+                false
             }
         }
     }
