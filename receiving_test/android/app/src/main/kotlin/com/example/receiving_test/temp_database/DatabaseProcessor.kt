@@ -10,12 +10,32 @@ import android.content.Context
 class DatabaseProcessor(context: Context) {
     val messageDatabaseHandler = MessageDatabaseHandler(context)
 
-    fun addMessage(message: MessageModel) {
-        messageDatabaseHandler.addMessage(message)
+    fun addMessage(message: MessageModel): Boolean {
+        val messageValues = ContentValues().apply {
+            put(KEY_CONVERSATION_ID, message.conversationId)
+            put(KEY_SENDER_ID, message.senderId)
+            put(KEY_CONTENT, message.message)
+            put(KEY_TIMESTAMP, message.timestamp)
+        }
+        return messageDatabaseHandler.addMessage(messageValues)
     }
 
     fun getMessagesFromConversation(conversationId: Int): List<MessageModel> {
-        return messageDatabaseHandler.getMessagesFromConversation(conversationId)
+        val messageCursor = databaseHandler.getMessagesFromConversation(conversationId)
+        val messageList = ArrayList<MessageModel>()
+
+        while (messageCursor.moveToNext()) {
+            val message = MessageModel()
+            message.messageId = Integer.parseInt(messageCursor.getString(messageCursor.getColumnIndex(KEY_MESSAGE_ID)))
+            message.conversationId = Integer.parseInt(messageCursor.getString(messageCursor.getColumnIndex(KEY_CONVERSATION_ID)))
+            message.senderId = Integer.parseInt(messageCursor.getString(messageCursor.getColumnIndex(KEY_SENDER_ID)))
+            message.message = messageCursor.getString(messageCursor.getColumnIndex(KEY_CONTENT))
+            message.timestamp = messageCursor.getString(messageCursor.getColumnIndex(KEY_TIMESTAMP))
+            messageList.add(message)
+        }
+        messageCursor.close()
+
+        return messageList
     }
 
     fun getAllConversations(): List<ConversationModel> {

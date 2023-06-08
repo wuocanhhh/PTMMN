@@ -6,8 +6,6 @@ import 'package:receiving_test/method_channel_handler.dart';
 import 'package:receiving_test/models/conversation_model.dart';
 import 'package:receiving_test/models/message_model.dart';
 
-//! only make the sms and mms functionnalities in kotlin (like if kotlin was a)
-
 class ConversationScreen extends StatefulWidget {
   final ConversationModel conversation;
 
