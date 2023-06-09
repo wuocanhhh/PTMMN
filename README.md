@@ -42,10 +42,6 @@ To make Wave accessible to users around the world, we intend to offer multilingu
 
 In this digital era, security is paramount. Wave is designed with this principle in mind, intending to offer end-to-end encryption and local encryption options for every type of messaging. We are even considering the potential of implementing post quantum cryptography to stay one step ahead of potential threats.
 
-## Getting Involved
-
-As an open source project, Wave welcomes contributions from the community. Whether you're a seasoned developer or a user with great ideas, there is a place for you here. We believe that collective intelligence is key to creating an app that is robust, user-friendly, and innovative.
-
 ## Current Progress
 
 Please bear in mind that Wave is still in the early stages of development. The features described above are the goals we're working towards. We are making steady progress, and we're excited about the potential of this project.
@@ -54,6 +50,12 @@ Stay tuned to this space for updates on our progress and ways you can get involv
 
 * 7th of April 2023: A very basic version of an sms app is working.
 * 8th of June 2023: I can confirm that the previous version does not work as big architecture modifications are taking place.
+
+## Getting Involved
+
+As an open source project, Wave welcomes contributions from the community. Whether you're a seasoned developer or a user with great ideas, there is a place for you here. We believe that collective intelligence is key to creating an app that is robust, user-friendly, and innovative. Any help is always appreciated, even a small suggestion.
+
+You can find more information about the project structure to understand how Wave is built and how the architecture should be in `PROJECT_SCTRUCTURE`.
 
 ## Contributing
 
