@@ -13,10 +13,7 @@ import android.telephony.SmsMessage
 import android.util.Log
 import io.flutter.plugin.common.MethodChannel
 import android.telephony.TelephonyManager
-import com.example.receiving_test.models.ConversationModel
 import com.example.receiving_test.models.MessageModel
-import com.example.receiving_test.models.ParticipantModel
-import com.example.receiving_test.models.UserModel
 
 class SmsReceiver : BroadcastReceiver() {
 
@@ -31,14 +28,11 @@ class SmsReceiver : BroadcastReceiver() {
             val smsMessages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
             for (message in smsMessages) {
                 if (message.isEmail()) {continue} //! Temporary, if it is an sms sent using an email, just ignore it for now :P
-
-                var senderPhoneNumber = message.originatingAddress?.replace(Regex("[^0-9]"), "") //! Mabye keep the "+"?
-                senderPhoneNumber = senderPhoneNumber!!.drop(1) //! Temporary, yes I know it is cursed and there is phoneNumberUtils in Telephony
                 Log.d("SmsReceiver", "Message received from $senderPhoneNumber containing: ${message.messageBody}")
 
                 // Create a new message
                 val newMessage = MessageModel(
-                    sender = senderPhoneNumber,
+                    sender = message.originatingAddress?,
                     message = message.messageBody,
                     timestampSent = message.getTimestampMillis().toString(),
                     timestampReceived = System.currentTimeMillis().toString()

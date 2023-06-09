@@ -18,7 +18,8 @@ class MessageDatabaseHandler(context: Context) :
         private const val KEY_MESSAGE_ID = "message_id"
         private const val KEY_SENDER = "sender"
         private const val KEY_CONTENT = "content"
-        private const val KEY_TIMESTAMP = "timestamp"
+        private const val KEY_TIMESTAMP_SENT = "timestamp_sent"
+        private const val KEY_TIMESTAMP_RECEIVED = "timestamp_received"
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
@@ -26,7 +27,8 @@ class MessageDatabaseHandler(context: Context) :
                 $KEY_MESSAGE_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 $KEY_SENDER TEXT,
                 $KEY_CONTENT TEXT,
-                $KEY_TIMESTAMP TEXT
+                $KEY_TIMESTAMP_SENT TEXT,
+                $KEY_TIMESTAMP_RECEIVED TEXT
                 )""")
     }
 
@@ -39,10 +41,10 @@ class MessageDatabaseHandler(context: Context) :
             // Insert the message into the database
             val insertSuccess = db.insert(TABLE_MESSAGES, null, messageValues) != -1L
             Log.d("MessageDatabaseHandler", "Insert operation success: $insertSuccess")
-            return insertSuccess
+            insertSuccess
         } catch (e: Exception) {
             Log.e("MessageDatabaseHandler", "Error inserting message", e)
-            return false
+            false
         }
     }
 }
@@ -62,10 +64,10 @@ class MessageDatabaseHandler(context: Context) :
                         do {
                             // Build the message model object for each row in the result set
                             val message = MessageModel().apply {    
-                                id = it.getInt(it.getColumnIndex(KEY_MESSAGE_ID))
                                 sender = it.getString(it.getColumnIndex(KEY_SENDER))
                                 content = it.getString(it.getColumnIndex(KEY_CONTENT))
-                                timestamp = it.getString(it.getColumnIndex(KEY_TIMESTAMP))
+                                timestampSent = it.getString(it.getColumnIndex(KEY_TIMESTAMP_SENT))
+                                timestampReceived = it.getString(it.getColumnIndex(KEY_TIMESTAMP_RECEIVED))
                             }
                             messages.add(message)
                         } while (it.moveToNext())

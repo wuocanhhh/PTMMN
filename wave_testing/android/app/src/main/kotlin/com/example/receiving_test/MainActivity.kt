@@ -10,16 +10,12 @@ import com.example.receiving_test.database.DatabaseInterface
 import android.util.Log
 import android.content.Context
 import android.telephony.TelephonyManager
-import com.example.receiving_test.models.ConversationModel
 import com.example.receiving_test.models.MessageModel
-import com.example.receiving_test.models.ParticipantModel
-import com.example.receiving_test.models.UserModel
 
 
 class MainActivity: FlutterActivity() {
     private val METHOD_CHANNEL = "com.example.receiving_test/method"
     private val EVENT_CHANNEL = "com.example.receiving_test/event"
-    private val smsReceiver = SmsReceiver()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,87 +25,44 @@ class MainActivity: FlutterActivity() {
         MethodChannel(flutterEngine!!.dartExecutor.binaryMessenger, METHOD_CHANNEL).setMethodCallHandler {
             call, result ->
             when (call.method) {
-                "getConversation" -> {
-                    val conversationId = call.argument<Int>("conversationId")
-                    if (conversationId != null) {
-                        val messageModels = databaseInterface.getMessagesFromConversation(conversationId)
-                        val messageMaps = messageModels.map {
-                            mapOf(
-                                "messageId" to it.messageId,
-                                "conversationId" to it.conversationId,
-                                "senderId" to it.senderId,
-                                "message" to it.message,
-                                "timestamp" to it.timestamp
-                            )
-                        }
-                        result.success(messageMaps)
-                    } else {
-                        Log.d("MyApp", "Conversation ID cannot be null")
-                        result.error("INVALID_ARGUMENT", "Conversation ID cannot be null", null)
+                "getNewMessages" -> {
+                    val messages = databaseInterface.getAllMessages()
+                    val messageMaps = messages.map {
+                        mapOf(
+                            "sender" to it.sender,
+                            "message" to it.message,
+                            "timestampSent" to it.timestampSent,
+                            "timestampReceived" to it.timestampReceived
+                        )
                     }
+                    result.success(messageMaps)
                 }
 
                 "sendSms" -> {
                     val message = call.argument<String>("message")
-                    val conversationId = call.argument<Int>("conversationId")
-                    val users = databaseInterface.getAllUsersInConversation(conversationId!!)
+                    val phoneNumbers = call.argument<List<String>>("phoneNumbers")
 
-                    if (users.isNotEmpty() && message != null) {
-                        for (user in users) {
-                            val userPhoneNumber = user.phoneNumber
-                            if (userPhoneNumber != "me") { // Do not send message to yourself
-                                sendSms(userPhoneNumber, message)
-                                Log.d("MyApp", "Sending message to: $userPhoneNumber")
-                            }
+                    if (phoneNumbers != null && phoneNumbers.isNotEmpty() && message != null) {
+                        for (phoneNumber in phoneNumbers) {
+                            sendSms(phoneNumber, message)
+                            Log.d("MyApp", "Sending message to: $phoneNumber")
                         }
 
                         val sms = MessageModel(
-                            messageId = 0, // Replace this with proper ID generation logic
-                            conversationId = conversationId!!,
-                            senderId = databaseInterface.createOrReturnUser("me"),
+                            sender = databaseInterface.createOrReturnUser("me"),
                             message = message,
-                            timestamp = System.currentTimeMillis().toString()
+                            timestampSent = System.currentTimeMillis().toString(),
+                            timestampReceived = null
                         )
-                        databaseInterface.addMessage(sms)
-                        
-                        // Return a map containing messageId, senderId, and timestamp
-                        val resultMap = mapOf<String, Any>(
-                            "messageId" to sms.messageId,
-                            "senderId" to sms.senderId,
-                            "timestamp" to sms.timestamp
-                        )
-                        result.success(resultMap)
+                        result.success(databaseInterface.addMessage(sms))
                     } else {
                         Log.d("MyApp", "Could not send SMS, messages or participants is empty")
                         result.error("UNAVAILABLE", "Could not send SMS", null)
                     }
                 }
 
-                "getAllConversations" -> {
-                    val conversationModels = databaseInterface.getAllConversations()
-                    val conversationMaps = conversationModels.map {
-                        mapOf(
-                            "conversationId" to it.conversationId,
-                            "conversationName" to it.conversationName
-                        )
-                    }
-                    result.success(conversationMaps)
-                }
-
-                "createNewConversation" -> {
-                    val conversationName = call.argument<String>("conversationName")
-                    result.success(databaseInterface.createNewConversation(conversationName!!))
-                }
-
-                "createNewUser" -> {
-                    val phoneNumber = call.argument<String>("phoneNumber")
-                    result.success(databaseInterface.createOrReturnUser(phoneNumber!!))
-                }
-
-                "createNewParticipant" -> {
-                    val userId = call.argument<Int>("userId")
-                    val conversationId = call.argument<Int>("conversationId")
-                    result.success(databaseInterface.createNewParticipant(userId!!, conversationId!!))
+                "deleteAllMessages" -> {
+                    result.success(databaseInterface.deleteAllMessages()) //! Rename the database so it doesn't look like it deletes the actual database (it's just for temporary storing)
                 }
 
                 else -> result.notImplemented()
@@ -132,28 +85,17 @@ class MainActivity: FlutterActivity() {
         private var eventSink: EventChannel.EventSink? = null
 
         @JvmStatic
-        fun sendConversationToFlutter(conversation: ConversationModel) {
-            Log.d("MyApp", "Conversation was apparently been received by MainActivity")
-            val conversationModel: ConversationModel = conversation
-            val conversationMap = mapOf(
-                "conversationId" to conversationModel.conversationId,
-                "conversationName" to conversationModel.conversationName
-            )
-            eventSink?.success(conversationMap)
-        }
-
-        @JvmStatic
         fun sendMessageToFlutter(message: MessageModel) {
             val messageMap = mapOf(
-                "messageId" to message.messageId,
                 "conversationId" to message.conversationId,
-                "senderId" to message.senderId,
                 "message" to message.message,
-                "timestamp" to message.timestamp
+                "timestampSent" to message.timestampSent,
+                "timestampReceived" to message.timestampReceived
             )
             eventSink?.success(messageMap)
         }
     }
+
     private fun sendSms(phoneNumber: String, message: String) {
         try {
             val smsManager = SmsManager.getDefault()
