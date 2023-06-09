@@ -52,8 +52,8 @@ Please bear in mind that Wave is still in the early stages of development. The f
 
 Stay tuned to this space for updates on our progress and ways you can get involved. If you're excited about Wave and want to contribute, feel free to reach out or start contributing on our issues page.
 
-7th of April 2023: A very basic version of an sms app is working.
-8th of June 2023: I can confirm that the previous version does not work as big architecture modifications are taking place.
+* 7th of April 2023: A very basic version of an sms app is working.
+* 8th of June 2023: I can confirm that the previous version does not work as big architecture modifications are taking place.
 
 ## Contributing
 
