@@ -24,3 +24,7 @@ Thank you for your interest in contributing to Wave! Your help is greatly apprec
 - Keep your code clean and easy to read by using comments and following the coding style and conventions of the respective language or framework.
 
 Your contributions are valuable, and we appreciate your support in making this project a success. Thank you for being a part of the Wave community!
+
+## Understanding the structure
+
+You can find more information about the project structure to understand how Wave is built and how the architecture should be in `PROJECT_SCTRUCTURE`.
