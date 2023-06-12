@@ -7,13 +7,7 @@ class DatabaseInterface(context: Context) {
     val messageDatabaseHandler = MessageDatabaseHandler(context)
 
     fun addMessage(message: MessageModel): Boolean {
-        val messageValues = ContentValues().apply {
-            put(MessageDatabaseHandler.KEY_SENDER, message.sender)
-            put(MessageDatabaseHandler.KEY_CONTENT, message.content)
-            put(MessageDatabaseHandler.KEY_TIMESTAMP_SENT, message.timestampSent)
-            put(MessageDatabaseHandler.KEY_TIMESTAMP_RECEIVED, message.timestampReceived)
-        }
-        return messageDatabaseHandler.addMessage(messageValues)
+        return messageDatabaseHandler.addMessage(message)
     }
 
 

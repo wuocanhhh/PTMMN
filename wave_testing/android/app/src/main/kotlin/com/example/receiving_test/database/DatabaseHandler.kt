@@ -1,5 +1,7 @@
 package com.example.receiving_test.database
 
+//! Note, content and message is used for the same thing, mabye change everything to content or messageContent to avoid confusion TODO
+
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
@@ -35,9 +37,15 @@ class MessageDatabaseHandler(context: Context) :
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {Log.d("MessageDatabaseHandler", "Database upgrade attempt detected, but no upgrade required.")}
 
     // This function is used to add a message to the database
-    fun addMessage(messageValues: ContentValues): Boolean {
+    fun addMessage(message: MessageModel): Boolean {
     this.writableDatabase.use { db ->
         return try {
+            val messageValues = ContentValues().apply {
+                put(MessageDatabaseHandler.KEY_SENDER, message.sender)
+                put(MessageDatabaseHandler.KEY_CONTENT, message.message)
+                put(MessageDatabaseHandler.KEY_TIMESTAMP_SENT, message.timestampSent)
+                put(MessageDatabaseHandler.KEY_TIMESTAMP_RECEIVED, message.timestampReceived)
+            }
             // Insert the message into the database
             val insertSuccess = db.insert(TABLE_MESSAGES, null, messageValues) != -1L
             Log.d("MessageDatabaseHandler", "Insert operation success: $insertSuccess")
@@ -65,7 +73,7 @@ class MessageDatabaseHandler(context: Context) :
                             // Build the message model object for each row in the result set
                             val message = MessageModel().apply {    
                                 sender = it.getString(it.getColumnIndex(KEY_SENDER))
-                                content = it.getString(it.getColumnIndex(KEY_CONTENT))
+                                message = it.getString(it.getColumnIndex(KEY_CONTENT))
                                 timestampSent = it.getString(it.getColumnIndex(KEY_TIMESTAMP_SENT))
                                 timestampReceived = it.getString(it.getColumnIndex(KEY_TIMESTAMP_RECEIVED))
                             }

@@ -1,6 +1,6 @@
 package com.example.receiving_test.models
 
-data class SmsModel(
+data class MessageModel(
     var sender: String = "",
     var message: String = "",
     var timestampSent: String = "",

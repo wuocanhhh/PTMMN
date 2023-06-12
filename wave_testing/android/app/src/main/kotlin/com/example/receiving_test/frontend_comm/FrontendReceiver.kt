@@ -5,8 +5,9 @@ import io.flutter.plugin.common.MethodChannel
 import android.util.Log
 import com.example.receiving_test.database.DatabaseInterface
 import com.example.receiving_test.models.MessageModel
+import com.example.receiving_test.phone.PhoneMessageSending
 
-class MethodChannelHandler(private val databaseInterface: DatabaseInterface) {
+class FrontendReceiver(private val databaseInterface: DatabaseInterface) {
 
     companion object {
         const val METHOD_CHANNEL = "com.example.receiving_test.frontend_comm/method"
@@ -35,12 +36,12 @@ class MethodChannelHandler(private val databaseInterface: DatabaseInterface) {
 
                     if (phoneNumbers != null && phoneNumbers.isNotEmpty() && message != null) {
                         for (phoneNumber in phoneNumbers) {
-                            sendSms(phoneNumber, message) //! Fix this to point to the right spot when it will be there
+                            PhoneMessageSending.sendSms(phoneNumber, message)
                             Log.d("MyApp", "Sending message to: $phoneNumber")
                         }
 
                         val sms = MessageModel(
-                            sender = databaseInterface.createOrReturnUser("me"),
+                            sender = "me",
                             message = message,
                             timestampSent = System.currentTimeMillis().toString(),
                             timestampReceived = null

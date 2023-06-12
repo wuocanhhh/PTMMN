@@ -4,7 +4,7 @@ import io.flutter.plugin.common.EventChannel
 import com.example.receiving_test.models.MessageModel
 import io.flutter.embedding.engine.FlutterEngine
 
-class EventChannelHandler {
+class FrontendSender {
 
     companion object {
         const val EVENT_CHANNEL = "com.example.receiving_test.frontend_comm/event"
@@ -12,8 +12,7 @@ class EventChannelHandler {
 
         @JvmStatic
         fun sendMessageToFlutter(message: MessageModel) {
-            val messageMap = mapOf(
-                "conversationId" to message.conversationId,
+            val messageMap = mapOf( //! TODO sender missing
                 "message" to message.message,
                 "timestampSent" to message.timestampSent,
                 "timestampReceived" to message.timestampReceived
