@@ -5,7 +5,6 @@ import io.flutter.embedding.android.FlutterActivity
 import com.example.receiving_test.database.DatabaseInterface
 import com.example.receiving_test.frontend_comm.FrontendSender
 import com.example.receiving_test.frontend_comm.FrontendReceiver
-import com.example.receiving_test.phone.PhoneMessageSending
 import com.example.receiving_test.test.TestInterface
 
 class MainActivity: FlutterActivity() {
@@ -13,15 +12,18 @@ class MainActivity: FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        TestInterface.testAll()
+        //Get the applicationContext from somewhere... (I really don't know from where it comes)
+        DatabaseInterface.initializeDatabaseContext(applicationContext)
 
-        val databaseInterface = DatabaseInterface(this)
-        val methodChannelHandler = FrontendReceiver(databaseInterface)
+        val methodChannelHandler = FrontendReceiver()
         val eventChannelHandler = FrontendSender()
 
         flutterEngine?.let { engine ->
             methodChannelHandler.setupMethodChannel(engine)
             eventChannelHandler.setupEventChannel(engine)
         }
+        
+        TestInterface.testAll(applicationContext)
+
     }
 }

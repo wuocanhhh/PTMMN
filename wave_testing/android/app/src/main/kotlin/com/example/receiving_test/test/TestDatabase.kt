@@ -1,37 +1,36 @@
 package com.example.receiving_test.test
 
 import com.example.receiving_test.database.DatabaseInterface
+import com.example.receiving_test.models.MessageModel
+import android.util.Log
+import com.example.receiving_test.MainActivity
+import com.example.receiving_test.phone.PhoneMessageSending
 
-class TestDatabase() {
-    companion object {
-        @JvmStatic
-        fun testAddMessage() : Boolean {
-            val newMessage = MessageModel(
-                sender = "testNumber",
-                message = "testMessage",
-                timestampSent = "testTimestampSent",
-                timestampReceived = "testTimestampReceived"
-            )
-            return DatabaseInterface.addMessage(newMessage)
-            //! Test if the message in the database is their
-        }
+object TestDatabase {
+    fun testAddMessage() : Boolean {
+        val newMessage = MessageModel(
+            sender = "testNumber",
+            messageContent = "testMessage",
+            timestampSent = "testTimestampSent",
+            timestampReceived = "testTimestampReceived"
+        )
+        return DatabaseInterface.addMessage(newMessage)
+    }
 
-        @JvmStatic
-        fun testGetAllMessages() : Boolean {
-            val messages = DatabaseInterface.getAllMessages()
-            val testMessage = message.first()
-            goodSender = message.sender == "testNumber"
-            goodMessage = message.message == "testMessage"
-            goodTimestampSent = message.timestampSent == "testTimestampSent"
-            goodTimestampReceived = message.timestampReceived == "testTimestampReceived"
-            return goodSender && goodMessage && goodTimestampSent && goodTimestampReceived
-        }
+    fun testGetAllMessages() : Boolean {
+        val messages = DatabaseInterface.getAllMessages()
+        val testMessage = messages.last()
+        val goodSender = testMessage.sender == "testNumber"
+        val goodMessage = testMessage.messageContent == "testMessage"
+        val goodTimestampSent = testMessage.timestampSent == "testTimestampSent"
+        val goodTimestampReceived = testMessage.timestampReceived == "testTimestampReceived"
 
-        @JvmStatic
-        fun testDeleteAllMessages() : Boolean {
-            test1 = DatabaseInterface.deleteAllMessages
-            test2 = DatabaseInterface.getAllMessages().isEmpty()
-            return test1 && test2
-        }
+        return goodSender && goodMessage && goodTimestampSent && goodTimestampReceived
+    }
+
+    fun testDeleteAllMessages() : Boolean {
+        val test1 = DatabaseInterface.deleteAllMessages()
+        val test2 = DatabaseInterface.getAllMessages().isEmpty()
+        return test1 && test2
     }
 }

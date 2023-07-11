@@ -19,11 +19,9 @@
             </intent-filter>
         </activity>
 
-
-
         <!-- BroadcastReceiver that listens for incoming SMS messages -->
         <receiver
-            android:name=".SmsReceiver"
+            android:name=".phone.PhoneMessageReceiving"
             android:permission="android.permission.BROADCAST_SMS"
             android:exported="true"
             >

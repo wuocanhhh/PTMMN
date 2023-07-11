@@ -6,32 +6,6 @@ class EventChannelHandler {
   static const EventChannel _eventChannel =
       const EventChannel('com.example.receiving_test/event');
 
-  void setUpConversationEventListener({
-    required Function(ConversationModel) onConversationReceived,
-  }) {
-    _eventChannel.receiveBroadcastStream().listen((dynamic event) {
-      if (event is Map) {
-        final Map<String, dynamic> eventData = event.cast<String, dynamic>();
-
-        if (eventData.containsKey('conversationId') &&
-            eventData.containsKey('conversationName')) {
-          final ConversationModel conversation = ConversationModel(
-            conversationId: eventData['conversationId'],
-            conversationName: eventData['conversationName'],
-          );
-          print('Received conversation from Kotlin: $conversation');
-          onConversationReceived(conversation);
-        } else {
-          print('Ignoring message event data');
-        }
-      } else {
-        print('Error: received event is not a Map');
-      }
-    }, onError: (dynamic error) {
-      print('Error receiving data from Kotlin: ${error.message}');
-    });
-  }
-
   void setUpMessageEventListener({
     required Function(MessageModel) onMessageReceived,
   }) {

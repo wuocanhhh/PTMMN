@@ -1,7 +1,5 @@
 package com.example.receiving_test.database
 
-//! Note, content and message is used for the same thing, mabye change everything to content or messageContent to avoid confusion TODO
-
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
@@ -19,7 +17,7 @@ class MessageDatabaseHandler(context: Context) :
         private const val TABLE_MESSAGES = "messages"
         private const val KEY_MESSAGE_ID = "message_id"
         private const val KEY_SENDER = "sender"
-        private const val KEY_CONTENT = "content"
+        private const val KEY_MESSAGE_CONTENT = "messageContent"
         private const val KEY_TIMESTAMP_SENT = "timestamp_sent"
         private const val KEY_TIMESTAMP_RECEIVED = "timestamp_received"
     }
@@ -28,7 +26,7 @@ class MessageDatabaseHandler(context: Context) :
         db?.execSQL("""CREATE TABLE $TABLE_MESSAGES(
                 $KEY_MESSAGE_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 $KEY_SENDER TEXT,
-                $KEY_CONTENT TEXT,
+                $KEY_MESSAGE_CONTENT TEXT,
                 $KEY_TIMESTAMP_SENT TEXT,
                 $KEY_TIMESTAMP_RECEIVED TEXT
                 )""")
@@ -38,24 +36,24 @@ class MessageDatabaseHandler(context: Context) :
 
     // This function is used to add a message to the database
     fun addMessage(message: MessageModel): Boolean {
-    this.writableDatabase.use { db ->
-        return try {
-            val messageValues = ContentValues().apply {
-                put(MessageDatabaseHandler.KEY_SENDER, message.sender)
-                put(MessageDatabaseHandler.KEY_CONTENT, message.message)
-                put(MessageDatabaseHandler.KEY_TIMESTAMP_SENT, message.timestampSent)
-                put(MessageDatabaseHandler.KEY_TIMESTAMP_RECEIVED, message.timestampReceived)
+        this.writableDatabase.use { db ->
+            return try {
+                val messageValues = ContentValues().apply {
+                    put(MessageDatabaseHandler.KEY_SENDER, message.sender)
+                    put(MessageDatabaseHandler.KEY_MESSAGE_CONTENT, message.messageContent)
+                    put(MessageDatabaseHandler.KEY_TIMESTAMP_SENT, message.timestampSent)
+                    put(MessageDatabaseHandler.KEY_TIMESTAMP_RECEIVED, message.timestampReceived)
+                }
+                // Insert the message into the database
+                val insertSuccess = db.insert(TABLE_MESSAGES, null, messageValues) != -1L
+                Log.d("Wave - MessageDatabaseHandler", "Insert operation success: $insertSuccess")
+                insertSuccess
+            } catch (e: Exception) {
+                Log.e("Wave - MessageDatabaseHandler", "Error inserting message", e)
+                false
             }
-            // Insert the message into the database
-            val insertSuccess = db.insert(TABLE_MESSAGES, null, messageValues) != -1L
-            Log.d("MessageDatabaseHandler", "Insert operation success: $insertSuccess")
-            insertSuccess
-        } catch (e: Exception) {
-            Log.e("MessageDatabaseHandler", "Error inserting message", e)
-            false
         }
     }
-}
 
 
     // This function is used to fetch all messages from the database
@@ -73,7 +71,7 @@ class MessageDatabaseHandler(context: Context) :
                             // Build the message model object for each row in the result set
                             val message = MessageModel().apply {    
                                 sender = it.getString(it.getColumnIndex(KEY_SENDER))
-                                message = it.getString(it.getColumnIndex(KEY_CONTENT))
+                                messageContent = it.getString(it.getColumnIndex(KEY_MESSAGE_CONTENT))
                                 timestampSent = it.getString(it.getColumnIndex(KEY_TIMESTAMP_SENT))
                                 timestampReceived = it.getString(it.getColumnIndex(KEY_TIMESTAMP_RECEIVED))
                             }
@@ -82,9 +80,9 @@ class MessageDatabaseHandler(context: Context) :
                     }
                 }
 
-                Log.d("MessageDatabaseHandler", "Number of messages fetched: ${messages.size}")
+                Log.d("Wave - MessageDatabaseHandler", "Number of messages fetched: ${messages.size}")
             } catch (e: Exception) {
-                Log.e("MessageDatabaseHandler", "Error reading all messages", e)
+                Log.e("Wave - MessageDatabaseHandler", "Error reading all messages", e)
             }
         }
         return messages
@@ -96,10 +94,10 @@ class MessageDatabaseHandler(context: Context) :
             return try {
                 // Delete all messages from the database
                 val numRowsDeleted = db.delete(TABLE_MESSAGES, null, null)
-                Log.d("MessageDatabaseHandler", "Number of rows deleted: $numRowsDeleted")
+                Log.d("Wave - MessageDatabaseHandler", "Number of rows deleted: $numRowsDeleted")
                 true
             } catch (e: Exception) {
-                Log.e("MessageDatabaseHandler", "Error deleting all messages", e)
+                Log.e("Wave - MessageDatabaseHandler", "Error deleting all messages", e)
                 false
             }
         }

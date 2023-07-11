@@ -19,7 +19,7 @@ import com.example.receiving_test.models.MessageModel
 import com.example.receiving_test.database.DatabaseInterface
 import com.example.receiving_test.MainActivity
 
-class SmsReceiver : BroadcastReceiver() {
+class PhoneMessageReceiving : BroadcastReceiver() {
 
     private lateinit var methodChannel: MethodChannel
 
@@ -33,16 +33,16 @@ class SmsReceiver : BroadcastReceiver() {
             for (message in smsMessages) {
                 if (message.isEmail()) {continue} //! Temporary, if it is an sms sent using an email, just ignore it for now :P
                 val senderPhoneNumber = message.originatingAddress!! //! Handle the null at some point
-                Log.d("SmsReceiver", "Message received from $senderPhoneNumber containing: ${message.messageBody}")
+                Log.d("Wave - SmsReceiver", "Message received from $senderPhoneNumber containing: ${message.messageBody}")
 
                 // Create a new message
                 val newMessage = MessageModel(
                     sender = senderPhoneNumber,
-                    message = message.messageBody,
+                    messageContent = message.messageBody,
                     timestampSent = message.getTimestampMillis().toString(),
                     timestampReceived = System.currentTimeMillis().toString()
                 )
-                DatabaseInterface(context).addMessage(newMessage)
+                DatabaseInterface.addMessage(newMessage)
 
                 //MainActivity.sendMessageToFlutter(newMessage) //! To fix (don't send if the app is killed)
                 showNotification(context, message) //! don't show it app is active

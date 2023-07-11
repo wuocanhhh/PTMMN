@@ -5,15 +5,13 @@ import com.example.receiving_test.models.MessageModel
 import io.flutter.embedding.engine.FlutterEngine
 
 class FrontendSender {
-
     companion object {
         const val EVENT_CHANNEL = "com.example.receiving_test.frontend_comm/event"
         private var eventSink: EventChannel.EventSink? = null
-
-        @JvmStatic
         fun sendMessageToFlutter(message: MessageModel) {
-            val messageMap = mapOf( //! TODO sender missing
-                "message" to message.message,
+            val messageMap = mapOf(
+                "messageContent" to message.messageContent,
+                "sender" to message.sender,
                 "timestampSent" to message.timestampSent,
                 "timestampReceived" to message.timestampReceived
             )

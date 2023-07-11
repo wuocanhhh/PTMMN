@@ -1,6 +1,6 @@
 class ConversationModel {
-  late int conversationId;
-  late String conversationName;
+  int conversationId;
+  String conversationName;
 
   ConversationModel(
       {required this.conversationId, required this.conversationName});
