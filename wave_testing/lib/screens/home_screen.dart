@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:receiving_test/method_channel_handler.dart';
-import 'package:receiving_test/screens/conversation_screen.dart';
-
-import '../event_channel_handler.dart';
-import '../models/conversation_model.dart';
+import '../widgets/conversation_list_widget.dart';
+import '../screens/new_conversation_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -12,130 +8,27 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<ConversationModel> _conversations = [];
-  final EventChannelHandler _eventChannelHandler = EventChannelHandler();
-  final MethodChannelHandler _methodChannelHandler = MethodChannelHandler();
-  final TextEditingController _textEditingController = TextEditingController();
-
-  void _onConversationReceived(ConversationModel conversation) {
-    print("A new conversation was created, is the UI updating?");
-    setState(() {
-      _conversations.add(conversation);
-    });
-  }
-
-  Future<void> _createConversation(String phoneNumber) async {
-    try {
-      final ConversationModel? newConversation =
-          await _methodChannelHandler.createConversation(phoneNumber);
-      if (newConversation != null) {
-        // Add the conversationId to the _conversationIds list and trigger a rebuild
-        setState(() {
-          _conversations.add(newConversation);
-        });
-      } else {
-        print("Failed to create conversation.");
-      }
-    } on PlatformException catch (e) {
-      print("Failed to create conversation: '${e.message}'.");
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    _eventChannelHandler.setUpConversationEventListener(
-      onConversationReceived: _onConversationReceived,
-    );
-
-    () async {
-      final List<ConversationModel>? conversationList =
-          await _methodChannelHandler.fetchConversations();
-      setState(() {
-        _conversations.addAll(conversationList ?? []);
-      });
-    }();
-  }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'SMS Conversations',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        backgroundColor: Color(0xFF2C2C2E), // Set the background color
-        body: Column(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TextField(
-                controller: _textEditingController,
-                decoration: InputDecoration(
-                  labelText: 'Enter phone number',
-                  labelStyle: TextStyle(color: Colors.white),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue),
-                  ),
-                ),
-                style: TextStyle(color: Colors.white),
-                keyboardType: TextInputType.phone,
-                onTap: () {
-                  FocusScope.of(context).requestFocus();
-                },
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _conversations.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    title: Text(
-                      '${_conversations[index].conversationName}',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white,
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ConversationScreen(
-                              conversation: _conversations[index]),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            if (_textEditingController.text.isNotEmpty) {
-              _createConversation(_textEditingController.text);
-              _textEditingController.clear();
-            }
-          },
-          child: Icon(Icons.add),
-          backgroundColor: Colors.blue,
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('SMS Conversations'),
+      ),
+      body: ConversationListWidget(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NewConversationScreen()),
+          ).then((_) {
+            setState(() {
+              // This will refresh the state of the HomeScreen widget and call the build method again.
+            });
+          });
+        },
+        child: Icon(Icons.add),
+        backgroundColor: Colors.blue,
       ),
     );
   }
