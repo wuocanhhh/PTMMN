@@ -1,2 +1,3 @@
+# This is to make the project show dart on github instead of C++
 * linguist-vendored
 *.dart linguist-vendored=false
