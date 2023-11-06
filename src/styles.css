@@ -1,109 +1,253 @@
-:root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
-
-  color: #0f0f0f;
-  background-color: #f6f6f6;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-}
-
-.container {
+* {
+  /* Thẻ này là chọn tất cả các thẻ trong chương trình */
+  padding: 0;
   margin: 0;
-  padding-top: 10vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  box-sizing: border-box;
+}
+html {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.text-white {
+  color: #ccc !important;
+}
+
+#main {
+}
+
+#header {
+  height: 46px;
+  background: black;
+  position: fixed; /* */
+  top: 0; /*Bám dính bên trên */
+  left: 0; /*Dính sát vào mép bên trái*/
+  right: 0;
+  z-index: 1; /*Giữa cho ảnh đừng chen đi mất thanh header  */
+}
+
+#header .search-button {
+  float: right; /* Kế thừa chiều ngang bên phải*/
+  padding: 0 21px; /*Đệm*/
+  cursor: pointer; /*Hình bàn tay khi trỏ chuột vào*/
+}
+#header .search-button:hover {
+  background-color: #f44366;
+}
+
+#header .search-icon {
+  color: #fff;
+  font-size: 20px;
+  line-height: 46px; /*Canh giữa kính lúp*/
+}
+
+#nav {
+  display: inline-block; /*Chiều dài bằng đúng khoảng cách không thừa */
+}
+#nav .font-size-down {
+  /*icon chỉ xuống chỗ More*/
+
+  font-size: 12px;
+}
+
+#nav li {
+  display: inline-block; /*Đứng ngang trên một dòng */
+  position: relative;
+}
+
+#nav > li > a {
+  color: #fff;
+  text-transform: uppercase; /*Đổi chữ thường thành chữ hoa */
+}
+
+#nav li a {
+  /* Tất cả những thẻ a là con của thẻ li và con của thẻ nav thì sẽ bị ăn những thuộc tính này*/
+
+  text-decoration: none;
+  line-height: 46px; /*Căn giữa chữ */
+  padding: 0 24px;
+  display: block;
+}
+
+#nav li:hover .subnav {
+  /*Cho hiện thẻ con của more*/
+  display: block;
+}
+
+#nav > li:hover > a,
+#nav .subnav li:hover a {
+  /* chỉ ghê chuột vào thẻ nào thẻ đó xám*/
+  color: #000;
+  background-color: #ccc;
+}
+
+#nav .subnav {
+  display: none;
+  /*min-width:200px ;  /*Chiều ngang tối thiểu*/
+  position: absolute;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /*Tạo bóng đổ cho màu*/
+}
+
+#nav .subnav a {
+  color: #000;
+  padding: 0 20px;
+  line-height: 38px;
+}
+#silder {
+  position: relative; /*Trục tọa độ đặt góc trên bên trái */
+  margin-top: 46px; /*Màu từ cuối header đến cuối silder */
+  padding-top: 50%; /*50% chiều ngang của chính nó*/
+  /*Khi phóng to và thu nhỏ thì lúc nào chiều cao cũng bằng 1/2 chiều rộng*/
+  background-image: url(/Assets/img/silder/victor.png);
+  background-repeat: no-repeat; /*Không lặp lại hình ảnh*/
+  background-position: top - center; /*Phần trên và căn giữa ảnh*/
+  background-size: cover;
+}
+
+#silder .text-content {
+  position: absolute;
+  bottom: 48px; /*Nâng chữ lên */
+  color: #1a0909;
+  width: 100%; /*Canh giữa đơn giảng nhất*/
+  /*left: 50%;/*Cách điểm bên trái 50%*/
+  /*transform: translateX(-50%);/*Lùi lại*/
+  text-align: center; /*Cho chữ new york ra giữa*/
+}
+
+#silder .text-heading {
+  font-weight: 500; /*Giảm độ giày chữ đi*/
+  font-size: 40px;
+}
+
+#silder .text-mota {
+  font-size: 20px;
+  margin-top: 20px;
+  letter-spacing: 2px;
+}
+
+#content {
+}
+#content .content-session {
+  width: 800px;
+  padding: 64px 0px; /* Đệm khoảng cách trên dưới trang web */
+
+  margin-left: auto;
+  margin-right: auto; /*Đẩy ra giữa trang web  */
+}
+
+#content .session-heading {
+  line-height: 46px;
+  color: #000;
+  text-align: center;
+  font-size: 50px;
+  font-weight: 50; /* Làm độ dày mỏng đi */
+  letter-spacing: 4px; /* Khoảng cách các chữ */
+  margin: 20px; /* Khoảng cách các dòng */
+}
+
+#content .session-content {
+  text-align: center;
+  font-size: 15px;
+  color: #000;
+  font-style: italic; /* Chữ nghiêng */
+  /* text-align: justify;       Căn đều như trang báo */
+  line-height: 1.6; /* Khoảng cách hai dòng chữ trên và dưới  */
+}
+#member {
+  position: relative;
+  overflow: hidden;
+}
+
+#member .member-list .member-item {
+  float: left; /*Cho tất cả lên một hàng ngang*/
+  overflow: hidden;
+  width: 33.33%; /*Chia tất cả các ảnh ra thành 3 phần bằng nhau*/
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
+#member .member-list .member-Name {
+  font-size: 24px;
 }
 
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
+#member .member-list .member-img {
+  width: 134px;
+  border-radius: 36px; /*Ảnh được booad góc lại*/
+  padding: 40px;
+}
+/* Tour Session */
+.Tour-session {
+  width: 100%;
+  padding: 64px 76px;
+  background-color: #000;
+  min-width: 200px; /*Chiều ngang tối thiểu*/
 }
 
-.row {
-  display: flex;
-  justify-content: center;
+.Tour-session h2 {
+  text-align: center;
+  font-size: 47px;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
+.Tour-session p {
   text-align: center;
 }
 
-input,
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
-  transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+.ticker-list {
+  background-color: #fff;
+  color: #000;
+  list-style: none;
 }
 
-button {
-  cursor: pointer;
+.ticker-list li {
+  color: #757575;
+  font-size: 15px;
+  padding: 4px 16px;
+  border-bottom: 1px solid #ddd; /* Tạo đường gạch chân */
 }
 
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
-}
-
-input,
-button {
-  outline: none;
+.ticker-list .Sold-out {
+  color: #fff;
+  background: #f44366;
+  padding: 4px 4px;
+  border-radius: 5px;
+  margin-left: 85%; /* Đẩy chữ ra xa */
 }
 
-#greet-input {
-  margin-right: 5px;
+.ticker-list .Number {
+  color: #fff;
+  background-color: #f44366;
+  padding: 4px 4px;
+  border-radius: 5px;
+  margin-left: 1000px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
-
-  a:hover {
-    color: #24c8db;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-  button:active {
-    background-color: #0f0f0f69;
-  }
+.img-content {
+  width: 1200px;
+  padding: 64px 76px;
+  background-color: #000;
+  /* float: left;
+  width: 33.33%;   /*Chia tất cả các ảnh ra thành 3 phần bằng nhau*/
 }
+
+#Pictures {
+  display: flex;
+  width: 100%;
+  justify-content: space-between; /*Thẻ bổ trợ thẻ flex*/
+  margin-top: 32px;
+}
+
+#Pictures .member-item {
+  background-color: #fff;
+  color: #000;
+}
+
+#Pictures .member-Name {
+  font-size: 45px;
+  text-align: center;
+}
+/* 
+#Pictures .member-item {
+  background-image: 33%;
+}
+
+#footer {
+} */
